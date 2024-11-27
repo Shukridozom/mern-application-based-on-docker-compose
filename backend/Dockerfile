@@ -24,6 +24,10 @@ RUN npm install
 # Copying all files from the current directory (that contains Dockerfile) into the current directory of the image (/app/)
 COPY . . 
 
+RUN chmod +x .wait-for-it.sh
+
+RUN mv ./.wait-for-it.sh /home/app/.wait-for-it.sh
+
 # Specifying the user
 USER app
 
@@ -31,4 +35,4 @@ USER app
 EXPOSE 8080
 
 # starting the node application
-CMD ["npm", "run", "dev"]
+CMD ["../.wait-for-it.sh", "db", "27017", "--", "npm", "run", "dev"]
