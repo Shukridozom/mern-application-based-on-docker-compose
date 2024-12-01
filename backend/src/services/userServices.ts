@@ -1,4 +1,7 @@
 import { userModel } from "../models/userModel";
+import bcrypt from 'bcrypt'
+
+const saltRounds = 10;
 
 interface userServiceOutput {
     statusCode: number,
@@ -85,7 +88,7 @@ interface registerDto {
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,
-          passwordHash: data.password,
+          passwordHash: await bcrypt.hash(data.password, saltRounds),
         });
     
         newUser.save();
@@ -108,8 +111,10 @@ interface registerDto {
         if (!user)
           return {statusCode: 404, response: wrongCredintialsMessage}
     
-        if (data.password === user.passwordHash)
+        if (await bcrypt.compare(data.password, user.passwordHash)) {
+          data.password = user.passwordHash;
           return {statusCode: 200, response: data}
+        }
     
         return {statusCode: 404, response: wrongCredintialsMessage}
       } catch (error: any) {
