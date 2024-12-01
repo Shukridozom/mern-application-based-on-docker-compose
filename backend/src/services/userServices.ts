@@ -74,7 +74,6 @@ interface registerDto {
   };
 
   export const registerService = async (body: any):Promise<userServiceOutput> => {
-    console.log(body);
     try {
         const data = toRegisterDto(body);
         if (!data)
@@ -103,7 +102,6 @@ interface registerDto {
   }
 
   export const loginService = async (body: any):Promise<userServiceOutput> => {
-    console.log(body);
     const wrongCredintialsMessage = "Incorrect email or password";
     try {
         const data = toLoginDto(body);
