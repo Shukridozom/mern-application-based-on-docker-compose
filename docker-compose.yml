@@ -1,0 +1,23 @@
+version:  '1.0.0'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - MONGO_URI=mongodb://db:27017/e-commerce
+  db:
+    image: mongo:8.0.3-noble
+    container_name: db-app
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db # Persistent storage for MongoDB
+
+volumes:
+  mongo-data: # Named volume for MongoDB data persistence
