@@ -1,4 +1,5 @@
 node -v > .nvmrc;
+echo "8.0.3" > .mongodb-version; # hard-coding the mongodb version at the development machine (for choosing the suitable Docker base image at production)
 npm init -y;
 npm i express typescript mongoose;
 npm i --save-dev nodemon ts-node;
@@ -26,11 +27,11 @@ touch nodemon.json
 
 # const DATABASE_HOST = "localhost";
 # const DATABASE_PORT = 27017;
-# const DATABASE_NAME = "ecommerce";
+# const DATABASE_NAME = "database-name";
 
 # const app = express();
-# const SERVER_HOST = "database-name";
-# const SERVER_PORT = 3001;
+# const SERVER_HOST = "localhost";
+# const SERVER_PORT = 8080;
 
 # mongoose
 #     .connect(`mongodb://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}`)
