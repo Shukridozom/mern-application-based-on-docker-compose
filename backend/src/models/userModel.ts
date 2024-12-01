@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 
 interface IUser extends Document {
     firstName: string,
-    lastName: String,
+    lastName: string,
     email: string,
     passwordHash: string
 }
