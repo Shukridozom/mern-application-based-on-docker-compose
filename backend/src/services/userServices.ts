@@ -1,5 +1,6 @@
 import { userModel } from "../models/userModel";
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const saltRounds = 10;
 
@@ -92,8 +93,10 @@ interface registerDto {
         });
     
         newUser.save();
-    
-        return {statusCode: 201};
+
+        const jwtToken = generateJwtToken(newUser.firstName, newUser.lastName, newUser.email);
+        return {statusCode: 200, response: jwtToken};
+
       } catch (error: any) {
         return {statusCode: 500};
       }
@@ -112,8 +115,8 @@ interface registerDto {
           return {statusCode: 404, response: wrongCredintialsMessage}
     
         if (await bcrypt.compare(data.password, user.passwordHash)) {
-          data.password = user.passwordHash;
-          return {statusCode: 200, response: data}
+          const jwtToken = generateJwtToken(user.firstName, user.lastName, user.email);
+          return {statusCode: 200, response: jwtToken};
         }
     
         return {statusCode: 404, response: wrongCredintialsMessage}
@@ -121,3 +124,14 @@ interface registerDto {
         return {statusCode: 500};
       }
   }
+
+  const generateJwtToken = (firstName: string, lastName: string, email: string) => {
+    const secretKey = '0a4f80a1e181f6345c783d66174da7980d43caadb5828b5637cd428bca47c4d4';
+    const expiresInString = '1h';
+
+    if(!firstName || !lastName || !email)
+      throw new Error('All firstName, lastName and email credentials are required');
+     
+    return jwt.sign({firstName: firstName, lastName: lastName, email: email}, secretKey, {expiresIn: expiresInString});
+  }
+  
