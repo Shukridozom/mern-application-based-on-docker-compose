@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import userRoute from "./routes/userRoute";
+import { seedInitialProducts } from "./services/productService";
 
 if (!process.env.MONGO_URI) {
     throw new Error('Environment variable MONGO_URL is not defined');
@@ -11,13 +12,14 @@ const app = express();
 const SERVER_HOST = "localhost";
 const SERVER_PORT = 8080;
 
+app.use(express.json());
+
 mongoose
     .connect(database_url)
     .then(() => console.log("Connected to MongoDB"))
     .catch((err) => console.log("Failed to connect to MongoDB"));
-
-
-app.use(express.json());
+    
+seedInitialProducts();
 
 app.use('/user', userRoute);
 
