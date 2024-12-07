@@ -10,19 +10,13 @@ interface cartServiceOutput {
     userId: string
   }
 
-const toGetCartDto = (data: any): getCartDto | undefined => {
-    if(!data)
+const toGetCartDto = (header: any): getCartDto | undefined => {
+    if(!header)
         return undefined;
 
-    const userHeader = data?.user;
-    if(!userHeader)
-        return undefined;
+    const userId:string = header?._id;
 
-    const userId = userHeader?._id;
-    if(!userId)
-        return undefined;
-
-    return {userId: userId};
+    return {userId}
     }
 
 interface addItemToCartDto {
@@ -31,24 +25,19 @@ interface addItemToCartDto {
     quantity: number
     }
 
-const toAddItemToCartDto = (data:any): addItemToCartDto | undefined => {
-    if(!data)
+const toAddItemToCartDto = (header:any, body: any): addItemToCartDto | undefined => {
+    if(!header || !body)
         return undefined;
 
-    const userHeader = data?.user;
-    if(!userHeader)
+    const userId:string = header?._id;
+
+    const productId = body?.productId;
+    const quantity = parseInt(body?.quantity);
+
+    if(!userId || !productId || !quantity)
         return undefined;
 
-    const userId = userHeader?._id;
-    if(!userId)
-        return undefined;
-
-    const productId = data.body?.productId;
-    const quantity = parseInt(data.body?.quantity);
-    if(!productId || !quantity)
-        return undefined;
-
-    return {userId: userId, productId: productId, quantity: quantity}
+    return {userId, productId, quantity: quantity}
 }
 
 interface updateItemInCartDto {
@@ -57,32 +46,28 @@ interface updateItemInCartDto {
     quantity: number
     }
 
-const toUpdateItemInCartDto = (data:any): updateItemInCartDto | undefined => {
-    if(!data)
+const toUpdateItemInCartDto = (header:any, body:any): updateItemInCartDto | undefined => {
+    if(!header || !body)
         return undefined;
 
-    const userHeader = data?.user;
-    if(!userHeader)
-        return undefined;
-
-    const userId = userHeader?._id;
+    const userId:string = header?._id;
     if(!userId)
         return undefined;
 
-    const productId = data.body?.productId;
-    const quantity = parseInt(data.body?.quantity);
-    if(!productId || !quantity)
+    const productId = body?.productId;
+    const quantity = parseInt(body?.quantity);
+    if(!userId || !productId || !quantity)
         return undefined;
 
-    return {userId: userId, productId: productId, quantity: quantity}
+    return {userId, productId, quantity}
 }
 
 export const getCart = async(data: any):Promise<cartServiceOutput> => {
-    try {
-        const userData = toGetCartDto(data);
-        if(!userData)
+    try {       
+        const params = toGetCartDto(data);
+        if(!params)
             return {statusCode: 400};
-        const userId = userData.userId;
+        const userId = params.userId;
         if(!userId)
             return {statusCode: 400};
 
@@ -103,63 +88,64 @@ const getActiveCartForUser = async(userId: string) => {
     return activeCart;
 }
 
-export const addItemToCart = async(data: any):Promise<cartServiceOutput> => {
+export const addItemToCart = async(header: any, body: any):Promise<cartServiceOutput> => {
     try {
-        const itemRequestParameters = toAddItemToCartDto(data);
-        if(!itemRequestParameters)
+        const params = toAddItemToCartDto(header, body);
+        if(!params)
             return {statusCode: 400}
 
-        let cart = await getActiveCartForUser(itemRequestParameters.userId);
+        let cart = await getActiveCartForUser(params.userId);
         if(!cart)
             return {statusCode: 400};
 
-        if(cart.items.find((p) => p.productId.toString() === itemRequestParameters.productId))
+        if(cart.items.find((p) => p.productId.toString() === params.productId))
             return {statusCode: 400, response: 'product already exists'}
 
-        const product = await productModel.findById(itemRequestParameters.productId)
+        const product = await productModel.findById(params.productId)
         if(!product)
             return {statusCode:400, response: 'unavailabe product'}
 
-        if(product.stock < itemRequestParameters.quantity)
+        if(product.stock < params.quantity)
             return {statusCode:400, response: 'low stock'}
 
-        cart.items.push({productId: itemRequestParameters.productId, quantity:itemRequestParameters.quantity, unitPrice: product.price});
-        cart.totalPrice += product.price * itemRequestParameters.quantity;
+        cart.items.push({productId: params.productId, quantity:params.quantity, unitPrice: product.price});
+        cart.totalPrice += product.price * params.quantity;
 
         cart.save();
 
         return {statusCode: 200, response: cart};
+
     } catch (error: any) {
         return {statusCode: 500}
     }
 }
 
-export const updateItemInCart = async(data: any):Promise<cartServiceOutput> => {
+export const updateItemInCart = async(header: any, body: any):Promise<cartServiceOutput> => {
     try {
-        const itemRequestParameters = toUpdateItemInCartDto(data);
-        if(!itemRequestParameters)
+        const params = toUpdateItemInCartDto(header, body);
+        if(!params)
             return {statusCode: 400}
 
-        let cart = await getActiveCartForUser(itemRequestParameters.userId);
+        let cart = await getActiveCartForUser(params.userId);
         if(!cart)
             return {statusCode: 400};
 
-        const item = cart.items.find((p) => p.productId.toString() === itemRequestParameters.productId);
+        const item = cart.items.find((p) => p.productId.toString() === params.productId);
         if(!item)
             return {statusCode: 400, response: 'Item is not available in the cart'}
 
-        const product = await productModel.findById(itemRequestParameters.productId);
+        const product = await productModel.findById(params.productId);
         if(!product)
             return {statusCode:400, response: 'unavailabe product'}
         
-        if(product.stock < itemRequestParameters.quantity)
+        if(product.stock < params.quantity)
             return {statusCode:400, response: 'low stock'}
 
         let sum = item.unitPrice * item.quantity;
-        sum = (product.price * itemRequestParameters.quantity) - sum;
+        sum = (product.price * params.quantity) - sum;
         cart.totalPrice += sum;
 
-        item.quantity = itemRequestParameters.quantity;
+        item.quantity = params.quantity;
         item.unitPrice = product.price;
 
         cart.save();
