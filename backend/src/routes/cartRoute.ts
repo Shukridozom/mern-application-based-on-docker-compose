@@ -1,6 +1,6 @@
 import express from "express";
 import { validateJWT } from "../middlewares/validateJWT";
-import { addItemToCart, getCart, updateItemInCart } from "../services/cartService";
+import { addItemToCart, deleteItemFromCart, getCart, updateItemInCart } from "../services/cartService";
 import { ExtendedRequest } from "../types/ExtendedRequest";
 
 const route = express.Router();
@@ -24,6 +24,15 @@ route.post('/item', validateJWT, async (req: ExtendedRequest, res) => {
 route.put('/item', validateJWT, async (req: ExtendedRequest, res) => {
     const userHeader = req?.user;
     await updateItemInCart(userHeader, req.body)
+    .then((data) => {
+        res.status(data.statusCode).send(data.response);
+    })
+})
+
+route.delete('/item/:productId', validateJWT, async(req: ExtendedRequest, res) => {
+    const userHeader = req?.user;
+    const reqParams = req?.params;
+    await deleteItemFromCart(userHeader, reqParams)
     .then((data) => {
         res.status(data.statusCode).send(data.response);
     })

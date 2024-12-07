@@ -62,6 +62,24 @@ const toUpdateItemInCartDto = (header:any, body:any): updateItemInCartDto | unde
     return {userId, productId, quantity}
 }
 
+interface deleteItemFromCartDto {
+    userId: string,
+    productId: any
+}
+
+const toDeleteItemFromCartDto = (header: any, reqParams: any): deleteItemFromCartDto | undefined => {
+    if(!header || !reqParams)
+        return undefined;
+
+    const userId: string = header?._id;
+    const productId = reqParams?.productId;
+
+    if(!userId || !productId)
+        return undefined;
+
+    return {userId, productId};
+}
+
 export const getCart = async(data: any):Promise<cartServiceOutput> => {
     try {       
         const params = toGetCartDto(data);
@@ -149,6 +167,35 @@ export const updateItemInCart = async(header: any, body: any):Promise<cartServic
         item.unitPrice = product.price;
 
         cart.save();
+
+        return {statusCode: 200, response: cart};
+    } catch (error: any) {
+        return {statusCode: 500}
+    }
+}
+
+export const deleteItemFromCart = async(header: any, reqParams: any):Promise<cartServiceOutput> => {
+    try {
+        const params = toDeleteItemFromCartDto(header, reqParams);
+        if(!params)
+            return {statusCode: 400};
+
+        let cart = await getActiveCartForUser(params.userId);
+        if(!cart)
+            return {statusCode: 400};
+
+        if(!cart.items.find((p) => p.productId.toString() === params.productId))
+            return {statusCode: 400}
+
+        const otherItems = cart.items.filter((p) => p.productId.toString() !== params.productId);
+
+        cart.totalPrice = otherItems.reduce((sum, p) => {
+            sum += p.quantity * p.unitPrice;
+            return sum;
+        }, 0);
+        cart.items = otherItems;
+
+        await cart.save();
 
         return {statusCode: 200, response: cart};
     } catch (error: any) {
