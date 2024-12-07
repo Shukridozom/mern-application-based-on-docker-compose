@@ -51,6 +51,32 @@ const toAddItemToCartDto = (data:any): addItemToCartDto | undefined => {
     return {userId: userId, productId: productId, quantity: quantity}
 }
 
+interface updateItemInCartDto {
+    userId: string,
+    productId: any,
+    quantity: number
+    }
+
+const toUpdateItemInCartDto = (data:any): updateItemInCartDto | undefined => {
+    if(!data)
+        return undefined;
+
+    const userHeader = data?.user;
+    if(!userHeader)
+        return undefined;
+
+    const userId = userHeader?._id;
+    if(!userId)
+        return undefined;
+
+    const productId = data.body?.productId;
+    const quantity = parseInt(data.body?.quantity);
+    if(!productId || !quantity)
+        return undefined;
+
+    return {userId: userId, productId: productId, quantity: quantity}
+}
+
 export const getCart = async(data: any):Promise<cartServiceOutput> => {
     try {
         const userData = toGetCartDto(data);
@@ -99,6 +125,42 @@ export const addItemToCart = async(data: any):Promise<cartServiceOutput> => {
 
         cart.items.push({productId: itemRequestParameters.productId, quantity:itemRequestParameters.quantity, unitPrice: product.price});
         cart.totalPrice += product.price * itemRequestParameters.quantity;
+
+        cart.save();
+
+        return {statusCode: 200, response: cart};
+    } catch (error: any) {
+        return {statusCode: 500}
+    }
+}
+
+export const updateItemInCart = async(data: any):Promise<cartServiceOutput> => {
+    try {
+        const itemRequestParameters = toUpdateItemInCartDto(data);
+        if(!itemRequestParameters)
+            return {statusCode: 400}
+
+        let cart = await getActiveCartForUser(itemRequestParameters.userId);
+        if(!cart)
+            return {statusCode: 400};
+
+        const item = cart.items.find((p) => p.productId.toString() === itemRequestParameters.productId);
+        if(!item)
+            return {statusCode: 400, response: 'Item is not available in the cart'}
+
+        const product = await productModel.findById(itemRequestParameters.productId);
+        if(!product)
+            return {statusCode:400, response: 'unavailabe product'}
+        
+        if(product.stock < itemRequestParameters.quantity)
+            return {statusCode:400, response: 'low stock'}
+
+        let sum = item.unitPrice * item.quantity;
+        sum = (product.price * itemRequestParameters.quantity) - sum;
+        cart.totalPrice += sum;
+
+        item.quantity = itemRequestParameters.quantity;
+        item.unitPrice = product.price;
 
         cart.save();
 
