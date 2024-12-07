@@ -1,10 +1,9 @@
 import mongoose, { Document, ObjectId, Schema } from "mongoose";
-import { IProduct } from "./productMode";
 
 const CartStatusEnum = ["active", "completed"]
 
 interface ICartItem {
-    productId: IProduct,
+    productId: ObjectId,
     unitPrice: number,
     quantity: number
 }

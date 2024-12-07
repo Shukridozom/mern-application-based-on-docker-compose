@@ -27,7 +27,7 @@ const toGetCartDto = (data: any): getCartDto | undefined => {
 
 interface addItemToCartDto {
     userId: string,
-    productId: string,
+    productId: any,
     quantity: number
     }
 
@@ -48,7 +48,7 @@ const toAddItemToCartDto = (data:any): addItemToCartDto | undefined => {
     if(!productId || !quantity)
         return undefined;
 
-    return {userId, productId, quantity}
+    return {userId: userId, productId: productId, quantity: quantity}
 }
 
 export const getCart = async(data: any):Promise<cartServiceOutput> => {
@@ -87,8 +87,7 @@ export const addItemToCart = async(data: any):Promise<cartServiceOutput> => {
         if(!cart)
             return {statusCode: 400};
 
-        // if(cart.items.find((p) => {p.productId.toString() === itemRequestParameters.productId}))
-        if(cart.items.find((p) => {p.productId === itemRequestParameters.productId}))
+        if(cart.items.find((p) => p.productId.toString() === itemRequestParameters.productId))
             return {statusCode: 400, response: 'product already exists'}
 
         const product = await productModel.findById(itemRequestParameters.productId)
