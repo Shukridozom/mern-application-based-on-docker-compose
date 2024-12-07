@@ -19,6 +19,19 @@ const toGetCartDto = (header: any): getCartDto | undefined => {
     return {userId}
     }
 
+interface deleteCartDto {
+    userId: string
+}
+
+const toDeleteCartDto = (header: any): deleteCartDto | undefined => {
+    if(!header)
+        return undefined;
+
+    const userId:string = header?._id;
+
+    return {userId}
+}
+
 interface addItemToCartDto {
     userId: string,
     productId: any,
@@ -94,6 +107,28 @@ export const getCart = async(data: any):Promise<cartServiceOutput> => {
 
     } catch (error: any) {
         return {statusCode: 500};
+    }
+}
+
+export const deleteCart = async(header: any):Promise<cartServiceOutput> => {
+    try {
+        const params = toDeleteCartDto(header);
+
+        if(!params)
+            return {statusCode: 400}
+
+        const cart = await getActiveCartForUser(params.userId);
+        if(!cart)
+            return {statusCode: 400};
+
+        cart.totalPrice = 0;
+        cart.items = [];
+
+        await cart.save();
+
+        return {statusCode: 200, response: cart}
+    } catch (error: any) {
+        return {statusCode: 500}
     }
 }
 
