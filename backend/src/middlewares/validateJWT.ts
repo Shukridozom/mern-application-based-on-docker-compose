@@ -5,7 +5,7 @@ import { ExtendedRequest } from "../types/ExtendedRequest";
 
 export const validateJWT = (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try {
-        const secretKey = '0a4f80a1e181f6345c783d66174da7980d43caadb5828b5637cd428bca47c4d4';
+        const secretKey = process?.env?.JWT_SECRET || '';
         const authHeader = req.get('authorization');
         if (!authHeader) {
             res.status(401).send();

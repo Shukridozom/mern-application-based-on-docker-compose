@@ -124,7 +124,7 @@ interface registerDto {
   }
 
   const generateJwtToken = (firstName: string, lastName: string, email: string) => {
-    const secretKey = '0a4f80a1e181f6345c783d66174da7980d43caadb5828b5637cd428bca47c4d4';
+    const secretKey = process?.env?.JWT_SECRET || '';
     const expiresInString = '1h';
 
     if(!firstName || !lastName || !email)
