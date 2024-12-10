@@ -1,0 +1,11 @@
+# Ignore Dockerfile itself
+./Dockerfile
+
+# Ignore shell script
+./scaffold-express-backend-project.sh
+
+# Ignore .dockerignore file
+./.dockerignore
+
+# Ignore node_modules
+node_modules/
