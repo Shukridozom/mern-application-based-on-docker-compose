@@ -1,6 +1,6 @@
 import express from "express";
 import { validateJWT } from "../middlewares/validateJWT";
-import { addItemToCart, deleteCart, deleteItemFromCart, getCart, updateItemInCart } from "../services/cartService";
+import { addItemToCart, checkout, deleteCart, deleteItemFromCart, getCart, updateItemInCart } from "../services/cartService";
 import { ExtendedRequest } from "../types/ExtendedRequest";
 
 const route = express.Router();
@@ -45,4 +45,11 @@ route.delete('/item/:productId', validateJWT, async(req: ExtendedRequest, res) =
     })
 })
 
+route.post('/checkout', validateJWT, async (req: ExtendedRequest, res) => {
+    const userHeader = req?.user;
+    await checkout(userHeader, req.body)
+    .then((data) => {
+        res.status(data.statusCode).send(data.response);
+    })
+})
 export default route;

@@ -1,4 +1,5 @@
 import { cartModel } from "../models/cartModel";
+import { IOrderItem, orderModel } from "../models/orderModel";
 import { productModel } from "../models/productMode";
 
 interface cartServiceOutput {
@@ -91,6 +92,23 @@ const toDeleteItemFromCartDto = (header: any, reqParams: any): deleteItemFromCar
         return undefined;
 
     return {userId, productId};
+}
+
+interface checkoutDto {
+    userId: string,
+    address: string
+}
+
+const toCheckoutDto = (header: any, body: any): checkoutDto | undefined => {
+    if(!header || !body)
+        return undefined;
+
+    const userId: string = header?._id;
+    const address: string = body?.address;
+    if(!userId || !address)
+        return undefined;
+
+    return {userId, address}
 }
 
 export const getCart = async(data: any):Promise<cartServiceOutput> => {
@@ -233,6 +251,49 @@ export const deleteItemFromCart = async(header: any, reqParams: any):Promise<car
         await cart.save();
 
         return {statusCode: 200, response: cart};
+    } catch (error: any) {
+        return {statusCode: 500}
+    }
+}
+
+export const checkout = async(header: any, body: any):Promise<cartServiceOutput> => {
+    try {
+        const params = toCheckoutDto(header, body);
+        if(!params)
+            return {statusCode: 400};
+
+        const cart = await getActiveCartForUser(params.userId);
+        const orderItems: IOrderItem[] = []
+
+        for(const item of cart.items) {
+            const product = await productModel.findById(item.productId);
+            if(!product)
+                return {statusCode:400, response: "Product was not found"}
+
+            const orderItem: IOrderItem = {
+                productTitle: product.title,
+                productImage: product.image,
+                quantity: item.quantity,
+                unitePrice: item.unitPrice
+            };
+
+            orderItems.push(orderItem);
+        }
+
+        const order = await orderModel.create({
+            orderItems,
+            total: cart.totalPrice,
+            address: params.address,
+            userId: params.userId
+        });
+
+        await order.save();
+        
+        cart.status = "completed";
+
+        await cart.save();
+
+        return {statusCode: 200, response: order}
     } catch (error: any) {
         return {statusCode: 500}
     }
