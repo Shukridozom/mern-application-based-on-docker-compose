@@ -7,6 +7,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    volumes:
+      - ./backend/src:/home/app/backend/src
     depends_on:
       - db
   db:
