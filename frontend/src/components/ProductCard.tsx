@@ -13,11 +13,11 @@ interface Props {
     price: string
 }
 
-const ProductCard = ({id, title, image, price}: Props) => {
+const ProductCard = ({title, image, price}: Props) => {
   return (
     <Card sx={{ maxWidth: 345 }}>
       <CardMedia
-        sx={{ height: 140 }}
+        sx={{ height: 400 }}
         image={image}
         title="green iguana"
       />
@@ -26,7 +26,7 @@ const ProductCard = ({id, title, image, price}: Props) => {
           {title}
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {price}
+            {price} $
         </Typography>
       </CardContent>
       <CardActions>
