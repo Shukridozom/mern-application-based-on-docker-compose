@@ -7,3 +7,4 @@ npm create vite@latest frontend -y
 
 cd frontend
 npm i
+npm i react-router-dom
