@@ -18,7 +18,7 @@ export const seedInitialProducts = async () => {
             image: "https://www.fonezone.ae/cdn/shop/files/lap_1.jpg?v=1690605098&width=1445", 
             stock: 8, 
             price: 20000
-        }
+        },
         {
             title: "HP", 
             image: "https://images-cdn.ubuy.ae/64ccb2559d908f42222b598a-hp-pavilion-13-3-fhd-intel-core-i3.jpg", 
