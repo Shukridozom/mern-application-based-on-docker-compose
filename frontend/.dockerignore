@@ -1,0 +1,15 @@
+# Ignore Dockerfile itself
+./Dockerfile
+
+# Ignore shell script
+./scaffold-react-frontend-project.sh
+
+# Ignore .dockerignore file
+./.dockerignore
+
+# Ignore node_modules
+node_modules/
+
+# Ignore .gitignore file
+./.gitignore
+

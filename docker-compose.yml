@@ -19,5 +19,14 @@ services:
     volumes:
       - mongo-data:/data/db # Persistent storage for MongoDB
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
 volumes:
   mongo-data: # Named volume for MongoDB data persistence
