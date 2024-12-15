@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 
 function NavBar() {
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-  const {username, isAuthenticated} = useAuth();
+  const {username, isAuthenticated, logout} = useAuth();
   const navigate = useNavigate();
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -27,6 +27,12 @@ function NavBar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    handleCloseUserMenu();
+  }
 
   const handleLogin = async() => {
     navigate('/login');
@@ -94,7 +100,7 @@ function NavBar() {
                 <MenuItem  onClick={handleCloseUserMenu}>
                   <Typography sx={{ textAlign: 'center' }}>My Orders</Typography>
                 </MenuItem>
-                <MenuItem  onClick={handleCloseUserMenu}>
+                <MenuItem  onClick={handleLogout}>
                   <Typography sx={{ textAlign: 'center' }}>Logout</Typography>
                 </MenuItem>
             </Menu>
