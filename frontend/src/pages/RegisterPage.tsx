@@ -1,5 +1,6 @@
 import { Box, Button, Container, TextField, Typography } from "@mui/material"
 import { useRef, useState } from "react";
+import { useAuth } from "../Context/Auth/AuthContext";
 
 const RegisterPage = () => {
 
@@ -7,6 +8,8 @@ const RegisterPage = () => {
     const lastNameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
+
+    const {login} = useAuth();
 
     const [error, setError] = useState(false);
 
@@ -16,6 +19,11 @@ const RegisterPage = () => {
         const email = emailRef.current?.value;
         const password = passwordRef.current?.value;
 
+
+        if(!firstName || !lastName || !email || !password) {
+            setError(true);
+            return;
+        }
 
         let headersList = {
             "Accept": "*/*",
@@ -40,7 +48,15 @@ const RegisterPage = () => {
                setError(true);  
                 return;
            }
-    }
+
+           const token = await response.text();
+           if(!token) {
+            setError(true);
+            return;
+           }
+
+           login(email, token);
+    };
 
     return (
         <Container>
