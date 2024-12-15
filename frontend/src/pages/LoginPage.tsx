@@ -1,6 +1,7 @@
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { useAuth } from "../Context/Auth/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
 
@@ -9,6 +10,7 @@ const LoginPage = () => {
 
 
     const {login} = useAuth();
+    const navigate = useNavigate();
 
     const [error, setError] = useState(false);
     
@@ -49,6 +51,7 @@ const LoginPage = () => {
            }
 
            login(email, token);
+           navigate("/");
            
            
     }
